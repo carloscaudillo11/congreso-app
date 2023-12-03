@@ -42,7 +42,12 @@ const NavbarComponent = () => {
 
       <NavbarContent className="sm:hidden pr-3" justify="center">
         <NavbarBrand>
-          <p className="font-bold text-inherit">ACME</p>
+          <Image
+            radius="none"
+            className="w-16 sm:w-16"
+            alt="NextUI hero Image"
+            src="https://leon.tecnm.mx/wp-content/uploads/2020/12/itl_leon.png"
+          />
         </NavbarBrand>
       </NavbarContent>
 

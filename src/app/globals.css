@@ -1,3 +1,18 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Estilos para la barra de desplazamiento */
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px; /* Ancho de la barra de desplazamiento */
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #a0aec0; /* Color del pulgar (barra) */
+    border-radius: 4px; /* Borde redondeado del pulgar */
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background-color: #edf2f7; /* Color de fondo de la barra de desplazamiento */
+  }
