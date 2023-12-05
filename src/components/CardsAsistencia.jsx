@@ -1,12 +1,9 @@
-'use client';
 import { Card, CardBody, Image } from '@nextui-org/react';
-import { useRouter } from 'next/navigation';
 
-function Cards({ participantes }) {
-  const router = useRouter();
+function CardsAsistencia({ asistentes }) {
   return (
     <>
-      {participantes.map((participante, key) => (
+      {asistentes.map((asistente, key) => (
         <Card
           isBlurred
           className="border-none bg-background/60 max-w-[610px]"
@@ -19,13 +16,8 @@ function Cards({ participantes }) {
                 <Image
                   alt="Album cover"
                   className="object-cover"
-                  src={participante.avatar}
+                  src={asistente.avatarParticipante}
                   width="100%"
-                  onClick={() => {
-                    router.push(
-                      `/pages/participantes/edit/${participante.idParticipantes}`
-                    );
-                  }}
                 />
               </div>
 
@@ -33,7 +25,8 @@ function Cards({ participantes }) {
                 <div className="flex justify-between items-start">
                   <div className="flex flex-col gap-1">
                     <h3 className="font-semibold text-foreground/90">
-                      {participante.nombre} {participante.apellidos}
+                      {asistente.nombreParticipante}{' '}
+                      {asistente.apellidoParticipante}
                     </h3>
                     <div className="flex gap-1 items-center">
                       <Image
@@ -42,10 +35,10 @@ function Cards({ participantes }) {
                         width={30}
                         height={30}
                       />
-                      <p>{participante.twitter}</p>
+                      <p>{asistente.twitterParticipante}</p>
                     </div>
                     <h1 className="text-lg font-medium mt-2">
-                      {participante.ocupacion}
+                      {asistente.ocupacionParticipante}
                     </h1>
                   </div>
                 </div>
@@ -58,4 +51,4 @@ function Cards({ participantes }) {
   );
 }
 
-export default Cards;
+export default CardsAsistencia;

@@ -1,125 +1,152 @@
 'use client';
-import { EnvelopeIcon } from '@heroicons/react/24/solid';
-import { Card, Input, Button, CardBody, Image } from '@nextui-org/react';
-import { useForm } from 'react-hook-form';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { toast } from 'sonner';
 import axios from '../../../api/axios.js';
+import { EnvelopeIcon } from '@heroicons/react/24/solid';
+import { Card, Input, Button, CardBody, Image } from '@nextui-org/react';
 
 const RegisterPage = () => {
   const router = useRouter();
   const params = useParams();
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors }
-  } = useForm({
-    defaultValues: {
-      name: '',
-      lastname: '',
-      email: '',
-      twitter: '',
-      avatar: ''
-    }
-  });
 
-  const avatares = [
-    {
-      name: 'Avatar 1',
-      href: '/1.png'
-    },
-    {
-      name: 'Avatar 2',
-      href: '/2.png'
-    },
-    {
-      name: 'Avatar 3',
-      href: '/3.png'
-    }
-  ];
+  const [nombre, setNombre] = useState('');
+  const [nombreError, setNombreError] = useState('');
+
+  const [apellidos, setApellidos] = useState('');
+  const [apellidosError, setApellidosError] = useState('');
+
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
+
+  const [twitter, setTwitter] = useState('');
+  const [twitterError, setTwitterError] = useState('');
+
+  const [avatar, setAvatar] = useState('');
+  const [ocupacion, setOcupacion] = useState('');
+  const [ocupacionError, setOcupacionError] = useState('');
 
   const [acceptTerms, setAcceptTerms] = useState(false);
 
-  const onSubmit = (data) => {
-    const formData = new FormData();
-    formData.append('name', data.name);
-    formData.append('lastname', data.lastname);
-    formData.append('email', data.email);
-    formData.append('twitter', data.twitter);
-    formData.append('avatar', data.avatar);
-    // console.log(formData.forEach((value, key) => console.log(key, value)));
-    const fetch = async () => {
-      if (params.id) {
-        const res = await axios.put(
-          `/menu/updateMenuElement/${params.id}`,
-          formData,
-          {
-            withCredentials: true,
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
-          }
-        );
-        return res.data;
-      } else {
-        const res = await axios.post('/menu/createMenuElement', formData, {
-          withCredentials: true,
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        return res.data;
-      }
+  const avatares = [
+    { name: 'Avatar 1', href: '/1.png' },
+    { name: 'Avatar 2', href: '/2.png' },
+    { name: 'Avatar 3', href: '/3.png' }
+  ];
+
+  const handleCheckboxChange = (e) => {
+    setAcceptTerms(e.target.checked);
+  };
+
+  const validateForm = () => {
+    let formIsValid = true;
+
+    if (!nombre) {
+      setNombreError('Por favor, ingresa un nombre.');
+      formIsValid = false;
+    } else {
+      setNombreError('');
+    }
+
+    if (!apellidos) {
+      setApellidosError('Por favor, ingresa los apellidos.');
+      formIsValid = false;
+    } else {
+      setApellidosError('');
+    }
+
+    if (!email) {
+      setEmailError('Por favor, ingresa un correo electrónico.');
+      formIsValid = false;
+    } else {
+      setEmailError('');
+    }
+
+    if (!ocupacion) {
+      setOcupacionError('Por favor, ingresa la ocupación.');
+      formIsValid = false;
+    } else {
+      setOcupacionError('');
+    }
+
+    if (!twitter) {
+      setTwitterError('Por favor, ingresa el twitter.');
+      formIsValid = false;
+    } else {
+      setTwitterError('');
+    }
+
+    return formIsValid;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    const data = {
+      nombre,
+      apellidos,
+      email,
+      twitter,
+      avatar,
+      ocupacion
     };
-    const promise = fetch();
-    toast.promise(promise, {
-      loading: 'Loading...',
-      success: () => {
-        router.back();
-        router.refresh();
-        return params.id
-          ? 'Elemento Actualizado Correctamente'
-          : 'Elemento Registrado Correctamente';
-      },
-      error: (err) => {
-        return err.response.data.message;
-      }
-    });
+
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const res = params.id
+        ? await axios.put(`/api/participante?id=${params.id}`, data)
+        : await axios.post(`/api/participante`, data);
+
+      toast.success(
+        params.id
+          ? 'Participante Actualizado Correctamente'
+          : 'Participante Registrado Correctamente'
+      );
+      router.push('/pages/participantes');
+      router.refresh();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || 'Error al procesar la solicitud'
+      );
+    }
   };
 
   useEffect(() => {
     if (params.id) {
-      const fetch = async () => {
-        const res = await axios.get(`/menu/getMenuElement/${params.id}`, {
-          withCredentials: true
-        });
-        return res.data;
+      const fetchData = async () => {
+        try {
+          const res = await axios.get(`/api/participante?id=${params.id}`);
+          const data = res.data;
+
+          setNombre(data.nombre);
+          setApellidos(data.apellidos);
+          setEmail(data.email);
+          setTwitter(data.twitter);
+          setAvatar(data.avatar);
+          setOcupacion(data.ocupacion);
+          setAcceptTerms(true);
+        } catch (error) {
+          console.error(error);
+        }
       };
-      const promise = fetch();
-      promise
-        .then((data) => {
-          setValue('name', data.name);
-          setValue('lastname', data.lastname);
-          setValue('email', data.email);
-          setValue('twitter', data.twitter);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+
+      fetchData();
     }
-  }, [params.id, setValue]);
+  }, [params.id]);
 
   return (
     <div className="mx-auto p-4 border border-gray-300 rounded-md flex flex-col items-center">
       <Card className="sm:w-2/5 sm:p-4">
         <CardBody>
-          <form className="py-4 sm:px-3 px-2" onSubmit={handleSubmit(onSubmit)}>
+          <form className="py-4 sm:px-3 px-2" onSubmit={handleSubmit}>
             <div className="space-y-16">
               <div className="border-b border-gray-900/10 pb-12">
-                <h2 className="text-base font-semibold leading-7 text-gray-900">
-                  Registrar de Participantes
+                <h2 className="text-lg font-semibold leading-7 text-gray-700">
+                  Registro de Participantes
                 </h2>
                 <p className="mt-1 text-sm leading-6 text-gray-600">
                   Ingresa información clara y concisa del Participante.
@@ -128,108 +155,88 @@ const RegisterPage = () => {
                 <div className="mt-10 flex flex-col gap-6">
                   <Input
                     type="text"
-                    variant="flat"
-                    placeholder="Juan"
                     label="Nombre"
-                    {...register('name', {
-                      required: {
-                        value: true,
-                        message: 'El nombre es requerido'
-                      }
-                    })}
-                    isInvalid={!!errors.name}
-                    errorMessage={errors.name?.message}
+                    value={nombre}
+                    onValueChange={setNombre}
+                    errorMessage={nombreError}
+                    isInvalid={Boolean(nombreError)}
                   />
 
                   <Input
                     type="text"
-                    variant="flat"
                     label="Apellidos"
-                    placeholder="Perez Lopez"
-                    {...register('lastname', {
-                      required: {
-                        value: true,
-                        message: 'El apellido es requerido'
-                      }
-                    })}
-                    isInvalid={!!errors.name}
-                    errorMessage={errors.lastname?.message}
+                    value={apellidos}
+                    onValueChange={setApellidos}
+                    errorMessage={apellidosError}
+                    isInvalid={Boolean(apellidosError)}
                   />
 
                   <Input
                     type="email"
-                    variant="flat"
                     label="Email"
-                    {...register('email', {
-                      required: {
-                        value: true,
-                        message: 'El email es requerido'
-                      },
-                      pattern: {
-                        value: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
-                        message: 'El email no es valido'
-                      }
-                    })}
-                    placeholder="you@example.com"
-                    isInvalid={!!errors.name}
-                    errorMessage={errors.email?.message}
-                    startContent={
-                      <EnvelopeIcon className="w-4 h-4 text-gray-500" />
+                    value={email}
+                    onValueChange={setEmail}
+                    endContent={
+                      <EnvelopeIcon className="w-5 h-5 text-gray-500" />
                     }
+                    errorMessage={emailError}
+                    isInvalid={Boolean(emailError)}
                   />
 
                   <Input
                     type="text"
-                    variant="flat"
+                    label="Ocupación"
+                    value={ocupacion}
+                    onValueChange={setOcupacion}
+                    errorMessage={ocupacionError}
+                    isInvalid={Boolean(ocupacionError)}
+                  />
+
+                  <Input
+                    type="text"
                     label="Twitter"
-                    placeholder="juanperez"
-                    {...register('twitter', {
-                      required: {
-                        value: true,
-                        message: 'El twitter es requerido'
-                      }
-                    })}
-                    isInvalid={!!errors.name}
-                    errorMessage={errors.twitter?.message}
+                    value={twitter}
+                    onValueChange={setTwitter}
+                    errorMessage={twitterError}
+                    isInvalid={Boolean(twitterError)}
                   />
 
                   <div className="flex gap-4 justify-between">
-                    {avatares.map((avatar, index) => (
+                    {avatares.map((avata, index) => (
                       <div key={index} className="flex flex-col gap-3">
                         <Image
                           width={100}
-                          alt={avatar.name}
-                          src={avatar.href}
+                          alt={avata.name}
+                          src={avata.href}
                           radius="full"
                         />
                         <div className="flex gap-4">
                           <input
                             type="radio"
-                            {...register('avatar', {
-                              required: {
-                                value: true,
-                                message: 'El avatar es requerido'
-                              }
-                            })}
-                            value={avatar.href}
+                            name="avatar"
+                            value={avata.href}
+                            onChange={() => setAvatar(avata.href)}
+                            checked={avata.href === avatar}
                             className="w-4 h-4"
                           />
-                          <span className="text-sm">{avatar.name}</span>
+                          <span className="text-sm">{avata.name}</span>
                         </div>
                       </div>
                     ))}
                   </div>
-                  <div className="flex gap-4">
-                    <input
-                      type="checkbox"
-                      checked={acceptTerms}
-                      onChange={(e) => setAcceptTerms(e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-sm">
-                      Leí y acepto los términos y condiciones
-                    </span>
-                  </div>
+                  {!params.id && (
+                    <div className="flex gap-4">
+                      <input
+                        type="checkbox"
+                        checked={acceptTerms}
+                        onChange={handleCheckboxChange}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm">
+                        Leí y acepto los términos y condiciones
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -240,14 +247,17 @@ const RegisterPage = () => {
                 type="button"
                 color="primary"
                 variant="light"
-                onClick={() => {
-                  router.back();
-                }}
+                onClick={() => router.back()}
               >
                 Cancelar
               </Button>
-              <Button size="sm" type="submit" color="primary">
-                Guardar
+              <Button
+                size="sm"
+                type="submit"
+                color="primary"
+                isDisabled={!acceptTerms}
+              >
+                {params.id ? 'Actualizar' : 'Registrar'}
               </Button>
             </div>
           </form>

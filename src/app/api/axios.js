@@ -1,8 +1,11 @@
 import axios from 'axios';
 
-const instance = axios.create({
-  baseURL: process.env.BACKEND_UR,
-  withCredentials: true
+const axiosInstance = axios.create({
+  baseURL: process.env.BACKEND_URL ?? 'http://localhost:5118',
+  timeout: 5000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
 
-export default instance;
+export default axiosInstance;
